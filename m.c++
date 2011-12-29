@@ -2,26 +2,42 @@
 #include <iostream>
 
 class PasswordEntry : public Gtk::Entry {
-	bool was_modified;
-	sigc::connection entry_inserted_conn;
+	bool was_modified, ignore_event;
 
-	void password_entry_inserted(const Glib::ustring s, int *len) {
+	bool on_focus_in_event(GdkEventFocus*) {
 		if (!was_modified) {
-			get_buffer()->set_text(s);
+			ignore_event = true;
+			get_buffer()->set_text("");
+			ignore_event = false;
 			set_visibility(false);
-			was_modified = true;
-			entry_inserted_conn.disconnect();
 		}
+
+		return false;
+	}
+
+	bool on_focus_out_event(GdkEventFocus*) {
+		if (!was_modified) {
+			ignore_event = true;
+			get_buffer()->set_text("[Password not displayed]");
+			ignore_event = false;
+			set_visibility(true);
+		}
+
+		return false;
+	}
+
+	void on_changed() {
+		if (!ignore_event)
+			was_modified = true;
 	}
 
 public:
 	PasswordEntry():
 			Gtk::Entry(),
-			was_modified(false)
+			was_modified(false),
+			ignore_event(false)
 	{
-		get_buffer()->set_text("[Password not displayed]");
-		entry_inserted_conn = signal_insert_text().connect(
-				sigc::mem_fun(*this, &PasswordEntry::password_entry_inserted));
+		this->on_focus_out_event(NULL);
 	}
 };
 
