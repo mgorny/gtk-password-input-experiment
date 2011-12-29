@@ -43,6 +43,10 @@ public:
 	{
 		this->on_focus_out_event(NULL);
 	}
+
+	bool get_modified() {
+		return was_modified;
+	}
 };
 
 void clk() {
