@@ -3,6 +3,7 @@
 
 class PasswordEntry : public Gtk::Entry {
 	bool was_modified, ignore_event;
+	Gdk::Color dimmed_text_color;
 
 	bool on_focus_in_event(GdkEventFocus*) {
 		if (!was_modified) {
@@ -10,6 +11,7 @@ class PasswordEntry : public Gtk::Entry {
 			get_buffer()->set_text("");
 			ignore_event = false;
 			set_visibility(false);
+			unset_text(Gtk::STATE_NORMAL);
 		}
 
 		return false;
@@ -21,6 +23,7 @@ class PasswordEntry : public Gtk::Entry {
 			get_buffer()->set_text("[Password not displayed]");
 			ignore_event = false;
 			set_visibility(true);
+			modify_text(Gtk::STATE_NORMAL, dimmed_text_color);
 		}
 
 		return false;
@@ -35,7 +38,8 @@ public:
 	PasswordEntry():
 			Gtk::Entry(),
 			was_modified(false),
-			ignore_event(false)
+			ignore_event(false),
+			dimmed_text_color("gray")
 	{
 		this->on_focus_out_event(NULL);
 	}
